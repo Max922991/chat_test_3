@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div class="chat-container">
+    <h2>Chat</h2>
+    <div id="messages"></div>
+    <form id="chatForm">
+        <input type="text" id="message" autocomplete="off" placeholder="Type your message"/>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/public', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById('message');
+        var messageContent = messageInput.value;
+        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({'content': messageContent}));
+        messageInput.value = '';
+    }
+
+    function showMessage(message) {
+        var messagesDiv = document.getElementById('messages');
+        var messageElement = document.createElement('div');
+        messageElement.innerHTML = '<strong>' + message.sender + ':</strong> ' + message.content;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    document.getElementById('chatForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        sendMessage();
+    });
+
+    connect();
+</script>
+</body>
+</html>
