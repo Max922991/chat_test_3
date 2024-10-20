@@ -12,6 +12,7 @@
     <div id="messages"></div>
     <form id="chatForm">
         <input type="text" id="message" autocomplete="off" placeholder="Type your message"/>
+        <input type="text" id="receiver" autocomplete="off" placeholder="Receiver's username"/>
         <button type="submit">Send</button>
     </form>
 </div>
@@ -27,14 +28,29 @@
             stompClient.subscribe('/topic/public', function (message) {
                 showMessage(JSON.parse(message.body));
             });
+            stompClient.subscribe('/user/queue/private', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
         });
     }
 
     function sendMessage() {
         var messageInput = document.getElementById('message');
+        var receiverInput = document.getElementById('receiver');
         var messageContent = messageInput.value;
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({'content': messageContent}));
+        var receiver = receiverInput.value;
+
+        if (receiver) {
+            stompClient.send("/app/chat.sendPrivateMessage", {}, JSON.stringify({
+                'content': messageContent,
+                'receiver': receiver
+            }));
+        } else {
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({'content': messageContent}));
+        }
+
         messageInput.value = '';
+        receiverInput.value = '';
     }
 
     function showMessage(message) {

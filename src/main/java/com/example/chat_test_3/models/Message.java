@@ -10,4 +10,5 @@ public class Message {
 
     String content;
     String sender;
+    String receiver;
 }
