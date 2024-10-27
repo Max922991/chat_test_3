@@ -34,6 +34,13 @@ public class Client implements UserDetails {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    @Column(name = "public_key", columnDefinition = "TEXT")
+    String publicKey;
+
+    @Column(name = "private_key", columnDefinition = "TEXT")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    String privateKey;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

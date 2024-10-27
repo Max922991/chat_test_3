@@ -21,7 +21,7 @@ public class ClientDetailsService implements UserDetailsService {
         Optional<Client> clientOptional = clientRepo.findByUsername(username);
 
         if (clientOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException("Client not found with username: " + username);
         }
 
         Client client = clientOptional.get();
@@ -30,7 +30,9 @@ public class ClientDetailsService implements UserDetailsService {
                 client.getId(),
                 client.getUsername(),
                 client.getPassword(),
-                client.getRole()
+                client.getRole(),
+                client.getPublicKey(),
+                client.getPrivateKey()
         );
     }
 }
